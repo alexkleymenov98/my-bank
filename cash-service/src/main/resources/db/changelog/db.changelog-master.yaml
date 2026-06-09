@@ -1,0 +1,4 @@
+databaseChangeLog:
+  # Сначала создаем схему
+  - include:
+      file: db/changelog/v1/v1-1.0.0_create_schema_cash.sql
