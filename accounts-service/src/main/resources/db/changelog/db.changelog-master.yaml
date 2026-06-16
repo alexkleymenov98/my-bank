@@ -2,3 +2,5 @@ databaseChangeLog:
   # Сначала создаем схему
   - include:
       file: db/changelog/v1/v1-1.0.0_create_schema.sql
+  - include:
+      file: db/changelog/v1/v1-1.0.0-create_account_table.sql

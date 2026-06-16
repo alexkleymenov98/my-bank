@@ -4,9 +4,10 @@ import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.mybankfront.controller.dto.AccountDto;
+import ru.yandex.practicum.mybankfront.dto.AccountDto;
 import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -24,8 +25,8 @@ public class AccountStub {
     private int sum = 100;
 
     private final List<AccountDto> accounts = List.of(
-            new AccountDto("petrov", "Петров Петр"),
-            new AccountDto("sidorov", "Сидоров Сидор")
+            new AccountDto("petrov", "Петров Петр", LocalDate.of(1998, 7, 15), BigDecimal.valueOf(1000)),
+            new AccountDto("sidorov", "Сидоров Сидор", LocalDate.of(1998, 7, 15), BigDecimal.valueOf(100))
     );
 
     public String getByLogin(String login) {

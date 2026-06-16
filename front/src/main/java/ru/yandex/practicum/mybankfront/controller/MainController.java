@@ -1,15 +1,25 @@
 package ru.yandex.practicum.mybankfront.controller;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.yandex.practicum.mybankfront.client.BankApiClient;
+import ru.yandex.practicum.mybankfront.dto.AccountDto;
 import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
 import ru.yandex.practicum.mybankfront.controller.stub.AccountStub;
+import ru.yandex.practicum.mybankfront.dto.AccountUpdate;
+import ru.yandex.practicum.mybankfront.dto.CashRequest;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Контроллер main.html.
@@ -32,11 +42,15 @@ import java.time.LocalDate;
  *
  * С примерами использования можно ознакомиться в тестовом классе заглушке AccountStub
  */
+@Slf4j
+@RequiredArgsConstructor
 @Controller
 public class MainController {
     // TODO: Удалить заглушку, так как используется только для ознакомительных целей
     @Autowired
     private AccountStub accountStub;
+
+    private final BankApiClient bankApiClient;
 
     /**
      * GET /.
@@ -56,8 +70,8 @@ public class MainController {
      */
     @GetMapping("/account")
     public String getAccount(Model model) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.fillModel(model, null, null);
+
+        fillModel(model);
 
         return "main";
     }
@@ -79,9 +93,14 @@ public class MainController {
             @RequestParam("name") String name,
             @RequestParam("birthdate") LocalDate birthdate
     ) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.setNameAndBirthdate(name, birthdate);
-        accountStub.fillModel(model, null, null);
+        try {
+            AccountDto account = bankApiClient.updateAccount(new AccountUpdate(name, birthdate));
+            model.addAttribute("name", account.name());
+            model.addAttribute("birthdate", account.birthdate());
+            fillModel(model);
+        } catch (Exception e) {
+            fillDegradedModel(model, "Ошибка обновления пользователя");
+        }
 
         return "main";
     }
@@ -103,8 +122,18 @@ public class MainController {
             @RequestParam("value") int value,
             @RequestParam("action") CashAction action
             ) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.editCash(model, value, action);
+
+        try {
+            CashRequest  request = new CashRequest(value, action);
+            AccountDto account = bankApiClient.updateCash(request);
+            model.addAttribute("name", account.name());
+            model.addAttribute("birthdate", account.birthdate());
+            model.addAttribute("sum", account.balance());
+            fillModel(model);
+        } catch (Exception e) {
+            fillDegradedModel(model, "Ошибка изменения счета");
+        }
+
 
         return "main";
     }
@@ -130,5 +159,38 @@ public class MainController {
         accountStub.transfer(model, value, login);
 
         return "main";
+    }
+
+    private void fillModel(Model model){
+        AccountDto account;
+
+        try {
+            log.info("controller get account fillModel");
+            account = bankApiClient.getAccount();
+        } catch (Exception e) {
+            log.error("Не удалось получить данные аккаунта: {}", e.getMessage());
+            fillDegradedModel(model, "Ошибка получения информации о пользователе");
+            return;
+        }
+
+        if(account == null) {
+            fillDegradedModel(model, "Сервисы не доступны");
+            return;
+        };
+
+        model.addAttribute("name", account.name() != null ? account.name() : "ass");
+        model.addAttribute("birthdate",
+                account.birthdate() != null ? account.birthdate().format(DateTimeFormatter.ISO_DATE) : "");
+        model.addAttribute("sum",account.balance() != null ? account.balance() : BigDecimal.ZERO);
+
+    }
+
+    private void fillDegradedModel(Model model, String errorMessage) {
+        model.addAttribute("name", "");
+        model.addAttribute("birthdate", LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+        model.addAttribute("sum", BigDecimal.ZERO);
+        model.addAttribute("accounts", Collections.emptyList());
+        model.addAttribute("errors", List.of(errorMessage));
+        model.addAttribute("info", null);
     }
 }

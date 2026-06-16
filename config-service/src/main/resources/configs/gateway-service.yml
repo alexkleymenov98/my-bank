@@ -14,21 +14,21 @@ spring:
               predicates:
                 - Path=/api/accounts/**
               filters:
-                - StripPrefix=2
+                - StripPrefix=1
 
             - id: transfer-route
               uri: lb://transfer-service
               predicates:
                 - Path=/api/transfer/**
               filters:
-                - StripPrefix=2
+                - StripPrefix=1
 
             - id: cash-route
               uri: lb://cash-service
               predicates:
                 - Path=/api/cash/**
               filters:
-                - StripPrefix=2
+                - StripPrefix=1
 
 management:
   endpoints:

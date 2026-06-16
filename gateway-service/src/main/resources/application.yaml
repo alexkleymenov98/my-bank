@@ -3,9 +3,16 @@ spring:
     name: gateway-service
   config:
     import: configserver:http://localhost:8088
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000/realms/bank
 
 # Для отладки
 logging:
   level:
-    org.springframework.cloud.config.client: DEBUG
+    org.springframework.security: DEBUG
     org.springframework.web: DEBUG
+    org.springframework.web.filter: DEBUG
+    reactor.netty.http.client: DEBUG

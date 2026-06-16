@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_POSTGRES_URI:jdbc:postgresql://localhost:5432/bank}
+    url: ${DB_POSTGRES_URI:jdbc:postgresql://localhost:5432/bank}?currentSchema=bank_accounts
     username: ${DB_POSTGRES_USERNAME:bank}
     password: ${DB_POSTGRES_PASSWORD:bank}
     driver-class-name: org.postgresql.Driver

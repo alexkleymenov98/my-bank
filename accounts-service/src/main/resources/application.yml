@@ -3,6 +3,12 @@ spring:
     name: accounts-service
   config:
     import: configserver:http://localhost:8088
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000/realms/bank  # URL вашего Keycloak
+#          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 
 eureka:
   client:
