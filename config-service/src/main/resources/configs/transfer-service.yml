@@ -60,6 +60,6 @@ eureka:
 
 services:
   accounts:
-    url: http://accounts-service
+    url: http://localhost:3000
   notification:
-    url: http://notification-service
+    url: http://localhost:3003
