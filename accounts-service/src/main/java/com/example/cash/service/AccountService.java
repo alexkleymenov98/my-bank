@@ -2,6 +2,7 @@ package com.example.cash.service;
 
 import com.example.cash.dto.AccountOperationRequest;
 import com.example.cash.dto.AccountResponse;
+import com.example.cash.dto.AccountTransferRequest;
 import com.example.cash.dto.AccountUpdate;
 import com.example.cash.exception.AccountNotFoundException;
 import com.example.cash.exception.ValidationBalanceException;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -24,18 +27,29 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
+
+    public AccountResponse getUserById(String userId){
+
+        AccountEntity account = accountRepository.findByUserId(userId).orElse(null);
+
+        if(account == null){
+            throw new AccountNotFoundException(userId);
+        }
+
+        return new AccountResponse(account.getUserId(), account.getName(), account.getBirthdate(), account.getBalance());
+    }
+
     public AccountResponse getUser(){
 
         String sub = SecurityUtils.getCurrentUserSub();
 
-        AccountEntity account = accountRepository.findByUserId(sub).orElse(null);
+        return getUserById(sub);
+    }
 
-        if(account == null){
-            return new AccountResponse("", "", null, BigDecimal.valueOf(0));
-        }
+    public List<AccountResponse> getUsers(){
+        String sub = SecurityUtils.getCurrentUserSub();
 
-
-        return new AccountResponse(account.getUserId(), account.getName(), account.getBirthdate(), account.getBalance());
+        return accountRepository.findAll().stream().filter(accountEntity -> !Objects.equals(accountEntity.getUserId(), sub)).map(account -> new AccountResponse(account.getUserId(), account.getName(), account.getBirthdate(), account.getBalance())).toList();
     }
 
 
@@ -62,7 +76,7 @@ public class AccountService {
             accountRepository.save(account);
         }
 
-        return getUser();
+        return getUserById(sub);
     }
 
     public AccountResponse deposit(AccountOperationRequest accountChangeBalance) {
@@ -77,7 +91,7 @@ public class AccountService {
 
         accountRepository.save(account);
 
-        return getUser();
+        return getUserById(account.getUserId());
 
     }
 
@@ -97,6 +111,18 @@ public class AccountService {
 
         accountRepository.save(account);
 
-        return getUser();
+        return getUserById(account.getUserId());
+    }
+
+    @Transactional
+    public AccountResponse transfer(AccountTransferRequest accountTransferRequest) {
+
+        log.info("Log " + accountTransferRequest.toString());
+
+        deposit(new AccountOperationRequest(accountTransferRequest.target(), accountTransferRequest.amount()));
+
+        withDraw(new AccountOperationRequest(accountTransferRequest.login(), accountTransferRequest.amount()));
+
+        return getUserById(accountTransferRequest.login());
     }
 }

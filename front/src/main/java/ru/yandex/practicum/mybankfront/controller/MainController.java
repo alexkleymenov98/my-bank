@@ -14,6 +14,7 @@ import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
 import ru.yandex.practicum.mybankfront.controller.stub.AccountStub;
 import ru.yandex.practicum.mybankfront.dto.AccountUpdate;
 import ru.yandex.practicum.mybankfront.dto.CashRequest;
+import ru.yandex.practicum.mybankfront.dto.TransferRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -155,18 +156,29 @@ public class MainController {
             @RequestParam("value") int value,
             @RequestParam("login") String login
     ) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.transfer(model, value, login);
+        try {
+            TransferRequest request = new TransferRequest(login, BigDecimal.valueOf(value));
+            AccountDto account = bankApiClient.transfer(request);
+            model.addAttribute("name", account.name());
+            model.addAttribute("birthdate", account.birthdate());
+            model.addAttribute("sum", account.balance());
+            fillModel(model);
+        } catch (Exception e) {
+            fillDegradedModel(model, "Ошибка выполнения перевода");
+        }
 
         return "main";
     }
 
     private void fillModel(Model model){
         AccountDto account;
+        List<AccountDto> accounts;
 
         try {
             log.info("controller get account fillModel");
             account = bankApiClient.getAccount();
+            accounts = bankApiClient.getAccounts();
+
         } catch (Exception e) {
             log.error("Не удалось получить данные аккаунта: {}", e.getMessage());
             fillDegradedModel(model, "Ошибка получения информации о пользователе");
@@ -182,6 +194,7 @@ public class MainController {
         model.addAttribute("birthdate",
                 account.birthdate() != null ? account.birthdate().format(DateTimeFormatter.ISO_DATE) : "");
         model.addAttribute("sum",account.balance() != null ? account.balance() : BigDecimal.ZERO);
+        model.addAttribute("accounts", accounts);
 
     }
 
