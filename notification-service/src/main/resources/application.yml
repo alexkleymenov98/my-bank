@@ -3,25 +3,3 @@ spring:
     name: notification-service
   config:
     import: configserver:http://localhost:8088
-
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/  # Адрес Eureka Server
-  instance:
-    prefer-ip-address: true
-
-services:
-  accounts:
-    url: http://localhost:3000
-  notification:
-    url: http://localhost:3003
-
-# Для отладки
-logging:
-  level:
-    org.springframework.cloud.config.client: DEBUG
-    org.springframework.web: DEBUG
-server:
-  port: 8001

@@ -13,6 +13,36 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  security:
+    oauth2:
+      client:
+        registration:
+          # ????????? Keycloak
+          keycloak:
+            provider: keycloak
+            client-id: ${KEYCLOAK_CLIENT_ID:transfer-service}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:NrIrH223UNvtiqcIdmVwSsczXzOpa5PB}
+            authorization-grant-type: client_credentials
+            scope:
+              - openid
+              - profile
+              - email
+
+        provider:
+          # ????????? ??? Keycloak
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9000/realms/bank}
+            # ?????????????? ????????? ????? endpoints
+            authorization-uri: ${KEYCLOAK_AUTH_URI:http://localhost:9000/realms/bank/protocol/openid-connect/auth}
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:9000/realms/bank/protocol/openid-connect/token}
+            user-info-uri: ${KEYCLOAK_USERINFO_URI:http://localhost:9000/realms/bank/protocol/openid-connect/userinfo}
+            jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:9000/realms/bank/protocol/openid-connect/certs}
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9000/realms/bank}
+          jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:9000/realms/bank/protocol/openid-connect/certs}
+
 server:
   port: 3001
 management:
@@ -20,3 +50,16 @@ management:
     web:
       exposure:
         include: refresh
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # Адрес Eureka Server
+  instance:
+    prefer-ip-address: true
+
+services:
+  accounts:
+    url: http://accounts-service
+  notification:
+    url: http://notification-service
