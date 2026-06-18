@@ -1,4 +1,4 @@
-package com.example.cash.model;
+package com.example.accounts.model;
 
 
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package com.example.cash.utils;
+package com.example.accounts.utils;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

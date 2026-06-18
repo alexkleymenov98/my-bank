@@ -1,4 +1,4 @@
-package com.example.cash.exception;
+package com.example.accounts.exception;
 
 public class ValidationBalanceException extends RuntimeException {
     public ValidationBalanceException() {

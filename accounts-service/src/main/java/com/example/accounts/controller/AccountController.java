@@ -1,10 +1,10 @@
-package com.example.cash.controller;
+package com.example.accounts.controller;
 
-import com.example.cash.dto.AccountOperationRequest;
-import com.example.cash.dto.AccountResponse;
-import com.example.cash.dto.AccountTransferRequest;
-import com.example.cash.dto.AccountUpdate;
-import com.example.cash.service.AccountService;
+import com.example.accounts.dto.AccountOperationRequest;
+import com.example.accounts.dto.AccountResponse;
+import com.example.accounts.dto.AccountTransferRequest;
+import com.example.accounts.dto.AccountUpdate;
+import com.example.accounts.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 

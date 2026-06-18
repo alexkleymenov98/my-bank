@@ -1,6 +1,6 @@
-package com.example.cash.repository;
+package com.example.accounts.repository;
 
-import com.example.cash.model.AccountEntity;
+import com.example.accounts.model.AccountEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

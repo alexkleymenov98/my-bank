@@ -1,14 +1,14 @@
-package com.example.cash.service;
+package com.example.accounts.service;
 
-import com.example.cash.dto.AccountOperationRequest;
-import com.example.cash.dto.AccountResponse;
-import com.example.cash.dto.AccountTransferRequest;
-import com.example.cash.dto.AccountUpdate;
-import com.example.cash.exception.AccountNotFoundException;
-import com.example.cash.exception.ValidationBalanceException;
-import com.example.cash.model.AccountEntity;
-import com.example.cash.repository.AccountRepository;
-import com.example.cash.utils.SecurityUtils;
+import com.example.accounts.dto.AccountOperationRequest;
+import com.example.accounts.dto.AccountResponse;
+import com.example.accounts.dto.AccountTransferRequest;
+import com.example.accounts.dto.AccountUpdate;
+import com.example.accounts.exception.AccountNotFoundException;
+import com.example.accounts.exception.ValidationBalanceException;
+import com.example.accounts.model.AccountEntity;
+import com.example.accounts.repository.AccountRepository;
+import com.example.accounts.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
