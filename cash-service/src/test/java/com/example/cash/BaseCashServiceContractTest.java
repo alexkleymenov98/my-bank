@@ -33,6 +33,6 @@ public abstract class BaseCashServiceContractTest {
         RestAssuredMockMvc.mockMvc(mockMvc);
 
         when(cashService.operationCash(any(CashOperationRequest.class)))
-                .thenReturn(new AccountDto("test", "Иван Иванов", LocalDate.of(1998, 5, 20), BigDecimal.valueOf(2000)));
+                .thenReturn(new AccountDto("test", "Иван Иванов", LocalDate.of(1998, 5, 20), BigDecimal.valueOf(1000)));
     }
 }

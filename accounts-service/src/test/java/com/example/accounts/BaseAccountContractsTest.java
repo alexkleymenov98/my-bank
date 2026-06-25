@@ -3,6 +3,7 @@ package com.example.accounts;
 import com.example.accounts.controller.AccountController;
 import com.example.accounts.dto.AccountOperationRequest;
 import com.example.accounts.dto.AccountResponse;
+import com.example.accounts.dto.AccountTransferRequest;
 import com.example.accounts.service.AccountService;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,9 @@ public abstract class BaseAccountContractsTest {
 
         when(accountService.getUser())
                 .thenReturn(new AccountResponse("test", "Иван Иванов", LocalDate.of(1998, 5, 20), BigDecimal.valueOf(1500)));
+
+        when(accountService.transfer(new AccountTransferRequest("test", "alan", BigDecimal.valueOf(1000))))
+                .thenReturn(new AccountResponse("alan", "Алан Дзагоев", LocalDate.of(1998, 5, 20), BigDecimal.valueOf(4000)));
     }
 }
 
