@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.springframework.cloud.contract' version "4.3.0"
+	id 'maven-publish'
 }
 
 group = 'com.example'
@@ -30,10 +32,44 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
+	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+
+contractTest {
+	useJUnitPlatform()
+	jvmArgs "-javaagent:${classpath.find { it.name.contains('byte-buddy-agent') }.absolutePath}"
+}
+
+// Конфигурация контрактов
+contracts {
+	// Базовый класс для тестов
+	baseClassForTests = 'com.example.accounts.BaseAccountContractsTest'
+	failOnNoContracts = false
+
+	// Указываем, где лежат контракты
+	contractsDslDir = file("src/test/resources/contract")
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = 'com.example'
+			artifactId = 'accounts'
+			version = '0.0.1-SNAPSHOT'
+
+			// Публикация основного JAR
+			from components.java
+
+			// Публикация JAR со стэбами
+			artifact verifierStubsJar
+		}
+	}
 }

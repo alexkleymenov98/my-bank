@@ -2,7 +2,6 @@ package ru.yandex.practicum.mybankfront.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.mybankfront.client.BankApiClient;
 import ru.yandex.practicum.mybankfront.dto.AccountDto;
 import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
-import ru.yandex.practicum.mybankfront.controller.stub.AccountStub;
 import ru.yandex.practicum.mybankfront.dto.AccountUpdate;
 import ru.yandex.practicum.mybankfront.dto.CashRequest;
 import ru.yandex.practicum.mybankfront.dto.TransferRequest;
@@ -47,10 +45,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 public class MainController {
-    // TODO: Удалить заглушку, так как используется только для ознакомительных целей
-    @Autowired
-    private AccountStub accountStub;
-
     private final BankApiClient bankApiClient;
 
     /**
