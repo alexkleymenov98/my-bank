@@ -15,7 +15,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9000/realms/bank}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}
 
 # Для отладки
 logging:
