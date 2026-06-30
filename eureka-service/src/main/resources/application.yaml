@@ -11,7 +11,7 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
   server:
     # В dev-режиме отключаем self-preservation, чтобы падения клиентов
     # сразу отражались в реестре.

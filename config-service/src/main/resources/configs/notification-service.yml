@@ -13,8 +13,8 @@ spring:
           # ????????? Keycloak
           keycloak:
             provider: keycloak
-            client-id: ${KEYCLOAK_CLIENT_ID:notification-service}
-            client-secret: ${KEYCLOAK_CLIENT_SECRET:ov84wZE9iamDQ8BRMNPaxHHA13dboj8L}
+            client-id: ${NOTIFICATION_KEYCLOAK_CLIENT_ID:notification-service}
+            client-secret: ${NOTIFICATION_KEYCLOAK_CLIENT_SECRET:ov84wZE9iamDQ8BRMNPaxHHA13dboj8L}
             authorization-grant-type: client_credentials
             scope:
               - openid
@@ -39,6 +39,6 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/  # Адрес Eureka Server
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
   instance:
     prefer-ip-address: true

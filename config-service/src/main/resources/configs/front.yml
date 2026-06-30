@@ -3,7 +3,6 @@ spring:
     oauth2:
       client:
         registration:
-          # ????????? Keycloak
           keycloak:
             provider: keycloak
             client-id: ${KEYCLOAK_CLIENT_ID:front}
@@ -16,18 +15,16 @@ spring:
               - email
 
         provider:
-          # ????????? ??? Keycloak
           keycloak:
-            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9000/realms/bank}
-            # ?????????????? ????????? ????? endpoints
-            authorization-uri: ${KEYCLOAK_AUTH_URI:http://localhost:9000/realms/bank/protocol/openid-connect/auth}
-            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:9000/realms/bank/protocol/openid-connect/token}
-            user-info-uri: ${KEYCLOAK_USERINFO_URI:http://localhost:9000/realms/bank/protocol/openid-connect/userinfo}
-            jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:9000/realms/bank/protocol/openid-connect/certs}
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}
+            authorization-uri: ${KEYCLOAK_AUTH_URI:http://localhost:8080/realms/bank/protocol/openid-connect/auth}
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8080/realms/bank/protocol/openid-connect/token}
+            user-info-uri: ${KEYCLOAK_USERINFO_URI:http://localhost:8080/realms/bank/protocol/openid-connect/userinfo}
+            jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8080/realms/bank/protocol/openid-connect/certs}
             user-name-attribute: preferred_username
 server:
   port: 8000
 
 services:
   gateway:
-    url: http://gateway-service
+    url: ${GATEWAY_SERVICE_URL:http://localhost:8001}

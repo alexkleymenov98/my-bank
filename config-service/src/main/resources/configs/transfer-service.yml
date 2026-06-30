@@ -20,8 +20,8 @@ spring:
           # ????????? Keycloak
           keycloak:
             provider: keycloak
-            client-id: ${KEYCLOAK_CLIENT_ID:transfer-service}
-            client-secret: ${KEYCLOAK_CLIENT_SECRET:NrIrH223UNvtiqcIdmVwSsczXzOpa5PB}
+            client-id: ${TRANSFER_KEYCLOAK_CLIENT_ID:transfer-service}
+            client-secret: ${TRANSFER_KEYCLOAK_CLIENT_SECRET:NrIrH223UNvtiqcIdmVwSsczXzOpa5PB}
             authorization-grant-type: client_credentials
             scope:
               - openid
@@ -54,12 +54,12 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/  # Адрес Eureka Server
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
   instance:
     prefer-ip-address: true
 
 services:
   accounts:
-    url: http://localhost:3000
+    url: ${ACCOUNTS_SERVICE_URL:http://localhost:3000}
   notification:
-    url: http://localhost:3003
+    url: ${NOTIFICATION_SERVICE_URL:http://localhost:3003}
