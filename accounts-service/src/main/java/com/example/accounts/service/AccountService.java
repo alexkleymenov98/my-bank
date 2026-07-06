@@ -30,11 +30,8 @@ public class AccountService {
 
     public AccountResponse getUserById(String userId){
 
-        AccountEntity account = accountRepository.findByUserId(userId).orElse(null);
-
-        if(account == null){
-            throw new AccountNotFoundException(userId);
-        }
+        AccountEntity account = accountRepository.findByUserId(userId)
+                .orElseThrow(()->new AccountNotFoundException(userId));
 
         return new AccountResponse(account.getUserId(), account.getName(), account.getBirthdate(), account.getBalance());
     }

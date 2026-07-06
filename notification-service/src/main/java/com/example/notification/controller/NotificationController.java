@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
     @PostMapping()
-    public Void send(@RequestBody  NotificationRequest request){
+    public void send(@RequestBody  NotificationRequest request){
         log.info("[NOTIFICATION] login:" + request.login() + "message:" + request.message());
-
-        return null;
     }
 
 }

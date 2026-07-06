@@ -3,9 +3,8 @@ package com.example.cash.service;
 import com.example.cash.client.AccountsClient;
 import com.example.cash.client.NotificationClient;
 import com.example.cash.dto.*;
+import com.example.cash.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -24,13 +23,9 @@ public class CashService {
 
         AccountDto result;
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String sub = SecurityUtils.getCurrentUserSub();
 
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new SecurityException("Пользователь не аутентифицирован");
-        }
-
-        AccountOperationRequest accountRequest = new AccountOperationRequest(auth.getName(), request.amount());
+        AccountOperationRequest accountRequest = new AccountOperationRequest(sub, request.amount());
 
         if(request.action().equals(CashAction.PUT)){
             result =  accountsClient.deposit(accountRequest);
@@ -40,7 +35,7 @@ public class CashService {
 
         String verb = request.action() == CashAction.PUT ? "Пополнение" : "Снятие";
 
-        notificationClient.send(new NotificationRequest(auth.getName(), "%s на сумму %s руб выполнено".formatted(verb, request.amount())));
+        notificationClient.send(new NotificationRequest(sub, "%s на сумму %s руб выполнено".formatted(verb, request.amount())));
 
         return result;
     }

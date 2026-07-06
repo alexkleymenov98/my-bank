@@ -6,6 +6,7 @@ import com.example.transfer.dto.AccountDto;
 import com.example.transfer.dto.NotificationRequest;
 import com.example.transfer.dto.TransferRequest;
 import com.example.transfer.dto.TransferRequestAccounts;
+import com.example.transfer.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,17 +26,13 @@ public class TransferService {
 
         AccountDto result;
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String sub = SecurityUtils.getCurrentUserSub();
 
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new SecurityException("Пользователь не аутентифицирован");
-        }
-
-        TransferRequestAccounts accountRequest = new TransferRequestAccounts(auth.getName(), request.target(),  request.amount());
+        TransferRequestAccounts accountRequest = new TransferRequestAccounts(sub, request.target(),  request.amount());
 
         result = accountsClient.transfer(accountRequest);
 
-        notificationClient.send(new NotificationRequest(auth.getName(), "Перевод на сумму " + request.amount() + " руб на пользователя " + request.target() + " выполнен"));
+        notificationClient.send(new NotificationRequest(sub, "Перевод на сумму " + request.amount() + " руб на пользователя " + request.target() + " выполнен"));
 
         return result;
     }
