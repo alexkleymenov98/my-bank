@@ -1,0 +1,23 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: eureka-service
+server:
+  port: 8761
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
+  server:
+    # В dev-режиме отключаем self-preservation, чтобы падения клиентов
+    # сразу отражались в реестре.
+    enable-self-preservation: false
+
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

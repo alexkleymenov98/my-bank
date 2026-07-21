@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: cash-service
+  config:
+    import: "optional:configserver:${CONFIG_SERVICE_URL:http://localhost:8088}"
+    cloud:
+      config:
+        fail-fast: false
+        retry:
+          max-attempts: 30
+          initial-interval: 2000
+          multiplier: 1.5
+          max-interval: 10000
+
+# Для отладки
+logging:
+  level:
+    org.springframework.cloud.config.client: DEBUG
+    org.springframework.web: DEBUG
