@@ -1,0 +1,27 @@
+dependencies:
+- name: common-microservice
+  repository: file://../common-microservice
+  version: 0.1.0
+- name: accounts
+  repository: file://../accounts
+  version: 0.1.0
+- name: cash
+  repository: file://../cash
+  version: 0.1.0
+- name: transfer
+  repository: file://../transfer
+  version: 0.1.0
+- name: notifications
+  repository: file://../notifications
+  version: 0.1.0
+- name: front-ui
+  repository: file://../front-ui
+  version: 0.1.0
+- name: keycloak-realm
+  repository: file://../keycloak-realm
+  version: 0.1.0
+- name: keycloak
+  repository: https://charts.bitnami.com/bitnami
+  version: 24.4.5
+digest: sha256:211b02614d262841033f1f3ad970586dd0be08ef832173cf32d82180503beaf9
+generated: "2026-08-03T17:54:22.100109+03:00"

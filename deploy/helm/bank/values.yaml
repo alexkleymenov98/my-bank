@@ -1,0 +1,52 @@
+# Overrides applied on top of values.yaml when deploying to the
+# `bank-dev` namespace.
+#
+# Usage:
+#   helm install bank . -n bank-dev --create-namespace -f values-dev.yaml
+
+global:
+  ingressHost: bank.local
+  authIngressHost: auth.bank.local
+
+accounts:
+  replicas: 1
+  config:
+    SPRING_PROFILES_ACTIVE: "k8s,dev"
+    KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+    KEYCLOAK_JWK_URI: "http://auth.bank.local/realms/bank/protocol/openid-connect/certs"
+
+cash:
+  replicas: 1
+  config:
+    SPRING_PROFILES_ACTIVE: "k8s,dev"
+    KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+    KEYCLOAK_JWK_URI: "http://auth.bank.local/realms/bank/protocol/openid-connect/certs"
+
+transfer:
+  replicas: 1
+  config:
+    SPRING_PROFILES_ACTIVE: "k8s,dev"
+    KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+    KEYCLOAK_JWK_URI: "http://auth.bank.local/realms/bank/protocol/openid-connect/certs"
+
+notifications:
+  replicas: 1
+  config:
+    SPRING_PROFILES_ACTIVE: "k8s,dev"
+    KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+    KEYCLOAK_JWK_URI: "http://auth.bank.local/realms/bank/protocol/openid-connect/certs"
+
+front-ui:
+  replicas: 1
+  config:
+    SPRING_PROFILES_ACTIVE: "k8s,dev"
+    SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI: "http://bank.local/login/oauth2/code/keycloak"
+    SERVICES_GATEWAY_URL: "http://bank.local"
+
+keycloak-realm:
+  realmsDir: realms-dev
+
+keycloak:
+  ingress:
+    hostname: auth.bank.local
