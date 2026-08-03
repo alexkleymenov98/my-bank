@@ -24,17 +24,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.liquibase:liquibase-core'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation("org.springframework.cloud:spring-cloud-starter-contract-stub-runner")
-	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -48,7 +43,6 @@ contractTest {
 	jvmArgs "-javaagent:${classpath.find { it.name.contains('byte-buddy-agent') }.absolutePath}"
 }
 
-// Конфигурация контрактов
 contracts {
 	// Базовый класс для тестов
 	baseClassForTests = 'com.example.accounts.BaseAccountContractsTest'

@@ -44,6 +44,6 @@ dependencies:
   # Postgres dependency, ingress and realm-import support. We let it own
   # its database too (postgresql.enabled=true).
   - name: keycloak
-    version: 24.4.5
+    version: 25.2.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: keycloak.enabled

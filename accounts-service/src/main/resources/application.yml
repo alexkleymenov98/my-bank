@@ -1,32 +1,49 @@
 spring:
   application:
     name: accounts-service
-  config:
-    import: "optional:configserver:${CONFIG_SERVICE_URL:http://localhost:8088}"
-    cloud:
-      config:
-        fail-fast: false
-        retry:
-          max-attempts: 30
-          initial-interval: 2000
-          multiplier: 1.5
-          max-interval: 10000
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}  # URL вашего Keycloak
-#          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/ # Адрес Eureka Server
-  instance:
-    prefer-ip-address: true
+  datasource:
+    url: ${DB_POSTGRES_URI:jdbc:postgresql://localhost:5432/bank?currentSchema=bank_accounts}
+    username: ${DB_POSTGRES_USERNAME:bank}
+    password: ${DB_POSTGRES_PASSWORD:bank}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: bank_accounts
 
-# Для отладки
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: bank_accounts
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: bank_accounts
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+server:
+  port: 8080
+
 logging:
   level:
     org.springframework.cloud.config.client: DEBUG
     org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    liquibase: DEBUG
