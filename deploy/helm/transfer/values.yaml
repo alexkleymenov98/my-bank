@@ -1,0 +1,35 @@
+replicas: 1
+port: 8080
+
+image:
+  repository: bank/transfer-service
+  tag: "1.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+config:
+  SPRING_PROFILES_ACTIVE: "k8s"
+
+  SERVER_PORT: "8080"
+
+  KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+  KEYCLOAK_JWK_URI: "http://auth.bank.local/realms/bank/protocol/openid-connect/certs"
+
+  TRANSFER_KEYCLOAK_CLIENT_ID: "transfer-service"
+
+  ACCOUNTS_SERVICE_URL: "http://accounts:8080"
+  NOTIFICATION_SERVICE_URL: "http://notifications:8080"
+
+secrets:
+  TRANSFER_KEYCLOAK_CLIENT_SECRET: "NrIrH223UNvtiqcIdmVwSsczXzOpa5PB"
+
+
+resources: {}
+
+global:
+  imagePullPolicy: IfNotPresent
+  hostAliases: []
+waitForOidc: "http://auth.bank.local/realms/bank/.well-known/openid-configuration"

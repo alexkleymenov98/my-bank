@@ -7,10 +7,7 @@ COPY build.gradle .
 COPY gradlew .
 COPY gradle gradle/
 
-# Копируем все модули
-COPY eureka-service eureka-service/
-COPY config-service config-service/
-COPY gateway-service gateway-service/
+
 COPY accounts-service accounts-service/
 COPY cash-service cash-service/
 COPY transfer-service transfer-service/
@@ -24,5 +21,5 @@ RUN --mount=type=cache,target=/root/.gradle \
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /workspace/cash-service/build/libs/*.jar app.jar
-EXPOSE 3002
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

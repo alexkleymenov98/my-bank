@@ -1,0 +1,47 @@
+# Default values for the accounts subchart.
+#
+# When installed via the umbrella chart, the umbrella's values.yaml can
+# override any of these under the `accounts:` key.
+
+replicas: 1
+port: 8080
+
+image:
+  repository: bank/accounts-service
+  tag: "1.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+config:
+  SPRING_PROFILES_ACTIVE: "k8s"
+  SERVER_PORT: "8080"
+  DB_POSTGRES_URI: "jdbc:postgresql://accounts-db:5432/accounts"
+  DB_POSTGRES_USERNAME: "accounts"
+
+  KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
+
+secrets:
+  DB_POSTGRES_PASSWORD: "accounts-pass"
+
+postgres:
+  database: accounts
+  username: accounts
+  storage: 1Gi
+  initSql: |
+    CREATE SCHEMA IF NOT EXISTS accounts AUTHORIZATION accounts;
+    GRANT ALL ON SCHEMA accounts TO accounts;
+  # storageClassName: standard   # uncomment to override the cluster default
+
+# Resource requests/limits — left unset by default. Set in
+# environment-specific values files (e.g. values-prod.yaml).
+resources: {}
+
+# global is filled in by the umbrella chart at render time; values here
+# are only used when this subchart is installed standalone.
+global:
+  imagePullPolicy: IfNotPresent
+  hostAliases: []
+waitForOidc: "http://auth.bank.local/realms/bank/.well-known/openid-configuration"

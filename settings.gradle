@@ -1,2 +1,2 @@
 rootProject.name = 'microservices-platform'
-include 'front', 'accounts-service', 'config-service', 'gateway-service','eureka-service','transfer-service','cash-service', 'notification-service'
+include 'front', 'accounts-service', 'transfer-service','cash-service', 'notification-service'
