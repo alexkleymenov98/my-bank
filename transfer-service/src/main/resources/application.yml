@@ -34,7 +34,7 @@ spring:
         show-details: always
 
 server:
-  port: 8084
+  port: ${SERVER_PORT:8084}
 
 services:
   accounts:
