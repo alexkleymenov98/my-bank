@@ -1,6 +1,24 @@
 spring:
   application:
     name: notification-service
+  kafka:
+    bootstrap-servers: http://localhost:9094  # УБРАТЬ http://
+    consumer:
+      group-id: notifications-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.example.notification.dto.NotificationEvent
+        spring.json.use.type.headers: false
+        isolation.level: read_committed
+        max.poll.records: 10
+      listener:
+        ack-mode: manual_immediate
+        concurrency: 3
+
   security:
     oauth2:
       resourceserver:

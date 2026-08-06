@@ -39,7 +39,7 @@ management:
       show-details: always
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8082}
 
 logging:
   level:
