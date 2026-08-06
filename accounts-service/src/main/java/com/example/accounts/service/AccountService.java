@@ -7,6 +7,7 @@ import com.example.accounts.dto.AccountUpdate;
 import com.example.accounts.exception.AccountNotFoundException;
 import com.example.accounts.exception.ValidationBalanceException;
 import com.example.accounts.model.AccountEntity;
+import com.example.accounts.producer.NotificationProducer;
 import com.example.accounts.repository.AccountRepository;
 import com.example.accounts.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
@@ -22,9 +23,11 @@ import java.util.Objects;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final NotificationProducer notificationProducer;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository , NotificationProducer notificationProducer) {
         this.accountRepository = accountRepository;
+        this.notificationProducer = notificationProducer;
     }
 
 
@@ -72,6 +75,8 @@ public class AccountService {
 
             accountRepository.save(account);
         }
+
+        notificationProducer.send("UPDATE_INFO", sub, "Обновленные данные: ФИО: " + accountUpdate.name() + " День рождение: " + accountUpdate.birthdate() );
 
         return getUserById(sub);
     }

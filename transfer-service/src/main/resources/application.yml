@@ -1,6 +1,8 @@
 spring:
   application:
     name: transfer-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:http://localhost:9094}
   security:
     oauth2:
       client:
@@ -36,9 +38,7 @@ server:
 
 services:
   accounts:
-    url: ${ACCOUNTS_SERVICE_URL:http://localhost:3000}
-  notification:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:3003}
+    url: ${ACCOUNTS_SERVICE_URL:http://localhost:8082}
 
 # Для отладки
 logging:

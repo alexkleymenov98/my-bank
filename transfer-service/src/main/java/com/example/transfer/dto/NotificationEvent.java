@@ -1,6 +1,8 @@
 package com.example.transfer.dto;
 
-public record NotificationRequest(
+public record NotificationEvent(
+        String eventId,
+        String eventType,
         String login,
         String message
 ) {

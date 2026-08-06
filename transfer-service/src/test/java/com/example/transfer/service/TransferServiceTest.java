@@ -1,7 +1,6 @@
 package com.example.transfer.service;
 
 import com.example.transfer.client.AccountsClient;
-import com.example.transfer.client.NotificationClient;
 import com.example.transfer.dto.AccountDto;
 import com.example.transfer.dto.TransferRequest;
 import com.example.transfer.dto.TransferRequestAccounts;
@@ -27,9 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

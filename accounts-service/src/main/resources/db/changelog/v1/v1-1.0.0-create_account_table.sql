@@ -5,5 +5,3 @@ create table if not exists accounts (
     birthdate date,
     balance DECIMAL(19,2) not null default 0.00
 );
-
-create index id_account_user_id on accounts(user_id);
