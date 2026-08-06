@@ -22,6 +22,8 @@ config:
   ACCOUNTS_SERVICE_URL: "http://accounts:8080"
   NOTIFICATION_SERVICE_URL: "http://notifications:8080"
 
+  KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
+
 secrets:
   CASH_KEYCLOAK_CLIENT_SECRET: "qSSVfNLbFKkmlvIN2rcuw23umfMd2y5d"
 

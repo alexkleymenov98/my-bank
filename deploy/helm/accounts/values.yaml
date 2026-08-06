@@ -23,6 +23,8 @@ config:
 
   KEYCLOAK_ISSUER_URI: "http://auth.bank.local/realms/bank"
 
+  KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
+
 secrets:
   DB_POSTGRES_PASSWORD: "accounts-pass"
 
