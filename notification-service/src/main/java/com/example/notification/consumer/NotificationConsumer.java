@@ -1,6 +1,5 @@
 package com.example.notification.consumer;
 
-import com.example.notification.dto.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -8,6 +7,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import shared.dto.NotificationEvent;
 
 @Slf4j
 @Component

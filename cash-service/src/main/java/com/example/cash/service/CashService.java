@@ -2,10 +2,10 @@ package com.example.cash.service;
 
 import com.example.cash.client.AccountsClient;
 import com.example.cash.dto.*;
-import com.example.cash.producer.NotificationProducer;
 import com.example.cash.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import shared.producer.NotificationProducer;
 
 @Slf4j
 @Service

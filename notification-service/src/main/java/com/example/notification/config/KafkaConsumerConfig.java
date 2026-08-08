@@ -1,6 +1,5 @@
 package com.example.notification.config;
 
-import com.example.notification.dto.NotificationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -8,6 +7,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.ExponentialBackOff;
+import shared.dto.NotificationEvent;
 
 
 @Configuration

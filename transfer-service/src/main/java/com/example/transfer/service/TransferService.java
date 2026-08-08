@@ -4,9 +4,9 @@ import com.example.transfer.client.AccountsClient;
 import com.example.transfer.dto.AccountDto;
 import com.example.transfer.dto.TransferRequest;
 import com.example.transfer.dto.TransferRequestAccounts;
-import com.example.transfer.producer.NotificationProducer;
 import com.example.transfer.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
+import shared.producer.NotificationProducer;
 
 @Service
 public class TransferService {

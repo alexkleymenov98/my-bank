@@ -1,14 +1,18 @@
-package com.example.cash.producer;
+package shared.producer;
 
-import com.example.cash.dto.NotificationEvent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import shared.dto.NotificationEvent;
 
 import java.util.UUID;
 
 @Component
 public class NotificationProducer {
     private final KafkaTemplate<String, NotificationEvent> notificationKafkaTemplate;
+
+    @Value("${kafka.topic.notification.name}")
+    private String topicNotificationName;
 
     public NotificationProducer(KafkaTemplate<String, NotificationEvent> notificationKafkaTemplate) {
         this.notificationKafkaTemplate = notificationKafkaTemplate;
@@ -22,6 +26,6 @@ public class NotificationProducer {
                 message
         );
 
-        notificationKafkaTemplate.send("notification-topic", login, event);
+        notificationKafkaTemplate.send(topicNotificationName, login, event);
     }
 }

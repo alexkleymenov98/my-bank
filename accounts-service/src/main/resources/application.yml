@@ -42,6 +42,11 @@ management:
 server:
   port: ${SERVER_PORT:8082}
 
+kafka:
+  topic:
+    notification:
+      name: "notification-topic"
+
 logging:
   level:
     org.springframework.cloud.config.client: DEBUG

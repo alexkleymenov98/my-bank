@@ -35,6 +35,11 @@ spring:
 server:
   port: ${SERVER_PORT:8083}
 
+kafka:
+  topic:
+    notification:
+      name: "notification-topic"
+
 services:
   accounts:
     url: ${ACCOUNTS_SERVICE_URL:http://localhost:8082}

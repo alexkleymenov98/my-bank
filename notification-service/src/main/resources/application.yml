@@ -2,7 +2,7 @@ spring:
   application:
     name: notification-service
   kafka:
-    bootstrap-servers: http://localhost:9094  # УБРАТЬ http://
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:http://localhost:9094}
     consumer:
       group-id: notifications-service
       auto-offset-reset: earliest
@@ -11,7 +11,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
-        spring.json.value.default.type: com.example.notification.dto.NotificationEvent
+        spring.json.value.default.type: shared.dto.NotificationEvent
         spring.json.use.type.headers: false
         isolation.level: read_committed
         max.poll.records: 10

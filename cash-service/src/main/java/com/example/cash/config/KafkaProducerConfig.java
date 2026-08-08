@@ -1,6 +1,5 @@
 package com.example.cash.config;
 
-import com.example.cash.dto.NotificationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +10,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import shared.dto.NotificationEvent;
 
 import java.util.HashMap;
 import java.util.Map;

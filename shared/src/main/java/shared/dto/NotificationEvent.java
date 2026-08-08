@@ -1,4 +1,4 @@
-package com.example.transfer.dto;
+package shared.dto;
 
 public record NotificationEvent(
         String eventId,
