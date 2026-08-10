@@ -1,24 +1,27 @@
 version: '3.8'
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    container_name: keycloak
-    command: start-dev
+    image: quay.io/keycloak/keycloak:26.4.1
+    container_name: mb-keycloak
+    command: [ "start-dev", "--import-realm", "--http-port=8080", "--http-enabled=true" ]
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-    volumes:
-      - keycloak_data:/opt/keycloak/data
+      KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
+      KC_HOSTNAME: "http://localhost:8080"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"
     ports:
-      - "${KEYCLOAK_PORT}:8080"
-    networks:
-      - bank-network
+      - "8080:8080"
+    volumes:
+        - ./keycloak/bank-realm.json:/opt/keycloak/data/import/bank-realm.json:ro
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
       interval: 10s
       timeout: 10s
       retries: 30
       start_period: 40s
+
   db:
     image: postgres:17
     container_name: database
@@ -37,237 +40,52 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-  eureka-service:
-    build:
-      context: .
-      dockerfile: eureka-service/Dockerfile
-    container_name: eureka-service
+
+  kafka:
+    image: apache/kafka:4.0.0
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT  # ДОБАВЛЕНО PLAINTEXT_HOST
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "9094:9094"
     networks:
       - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-    ports:
-      - "8761:8761"
     healthcheck:
-      test: [ "CMD-SHELL", "wget -qO - http://localhost:8761/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list" ]
       interval: 10s
-      timeout: 3s
-      retries: 20
+      timeout: 10s
+      retries: 10
       start_period: 30s
 
-  config-service:
-    build:
-      context: .
-      dockerfile: config-service/Dockerfile
-    container_name: config-service
-    ports:
-      - "8088:8088"
-    networks:
-      - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - DB_POSTGRES_URI=${DB_POSTGRES_URI}
-      - DB_POSTGRES_USERNAME=${DB_POSTGRES_USERNAME}
-      - DB_POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-      - KEYCLOAK_AUTH_URI=${KEYCLOAK_AUTH_URI}
-      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
-      - KEYCLOAK_USERINFO_URI=${KEYCLOAK_USERINFO_URI}
-      - KEYCLOAK_JWK_URI=${KEYCLOAK_JWK_URI}
-      - ACCOUNTS_SERVICE_URL=${ACCOUNTS_SERVICE_URL}
-      - NOTIFICATION_SERVICE_URL=${NOTIFICATION_SERVICE_URL}
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
     depends_on:
-      eureka-service:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8088/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    restart: on-failure
-
-  gateway-service:
-    build:
-      context: .
-      dockerfile: gateway-service/Dockerfile
-    container_name: gateway-service
-    ports:
-      - "8001:8001"
-    networks:
-      - bank-network
+       - kafka
     environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8001/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    restart: on-failure
-    depends_on:
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
-
-  accounts-service:
-    build:
-      context: .
-      dockerfile: accounts-service/Dockerfile
-    container_name: accounts-service
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     ports:
-      - "3000:3000"
+      - "8081:8080"
     networks:
-      - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - DB_POSTGRES_URI=${DB_POSTGRES_URI}
-      - DB_POSTGRES_USERNAME=${DB_POSTGRES_USERNAME}
-      - DB_POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-    restart: on-failure
-    depends_on:
-      db:
-        condition: service_healthy
-      keycloak:
-        condition: service_started
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
-
-  cash-service:
-    build:
-      context: .
-      dockerfile: cash-service/Dockerfile
-    container_name: cash-service
-    ports:
-      - "3002:3002"
-    networks:
-      - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - DB_POSTGRES_URI=${DB_POSTGRES_URI}
-      - DB_POSTGRES_USERNAME=${DB_POSTGRES_USERNAME}
-      - DB_POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-      - KEYCLOAK_AUTH_URI=${KEYCLOAK_AUTH_URI}
-      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
-      - KEYCLOAK_USERINFO_URI=${KEYCLOAK_USERINFO_URI}
-      - KEYCLOAK_JWK_URI=${KEYCLOAK_JWK_URI}
-      - CASH_KEYCLOAK_CLIENT_ID=${CASH_KEYCLOAK_CLIENT_ID}
-      - CASH_KEYCLOAK_CLIENT_SECRET=${CASH_KEYCLOAK_CLIENT_SECRET}
-      - ACCOUNTS_SERVICE_URL=${ACCOUNTS_SERVICE_URL}
-      - NOTIFICATION_SERVICE_URL=${NOTIFICATION_SERVICE_URL}
-    restart: on-failure
-    depends_on:
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
-      accounts-service:
-        condition: service_started
-
-  transfer-service:
-    build:
-      context: .
-      dockerfile: transfer-service/Dockerfile
-    container_name: transfer-service
-    ports:
-      - "3001:3001"
-    networks:
-      - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - DB_POSTGRES_URI=${DB_POSTGRES_URI}
-      - DB_POSTGRES_USERNAME=${DB_POSTGRES_USERNAME}
-      - DB_POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-      - KEYCLOAK_AUTH_URI=${KEYCLOAK_AUTH_URI}
-      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
-      - KEYCLOAK_USERINFO_URI=${KEYCLOAK_USERINFO_URI}
-      - KEYCLOAK_JWK_URI=${KEYCLOAK_JWK_URI}
-      - TRANSFER_KEYCLOAK_CLIENT_ID=${TRANSFER_KEYCLOAK_CLIENT_ID}
-      - TRANSFER_KEYCLOAK_CLIENT_SECRET=${TRANSFER_KEYCLOAK_CLIENT_SECRET}
-      - ACCOUNTS_SERVICE_URL=${ACCOUNTS_SERVICE_URL}
-      - NOTIFICATION_SERVICE_URL=${NOTIFICATION_SERVICE_URL}
-    restart: on-failure
-    depends_on:
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
-      accounts-service:
-        condition: service_started
-
-  notification-service:
-    build:
-      context: .
-      dockerfile: notification-service/Dockerfile
-    container_name: notification-service
-    ports:
-      - "3003:3003"
-    networks:
-      - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - DB_POSTGRES_URI=${DB_POSTGRES_URI}
-      - DB_POSTGRES_USERNAME=${DB_POSTGRES_USERNAME}
-      - DB_POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-      - KEYCLOAK_AUTH_URI=${KEYCLOAK_AUTH_URI}
-      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
-      - KEYCLOAK_USERINFO_URI=${KEYCLOAK_USERINFO_URI}
-      - KEYCLOAK_JWK_URI=${KEYCLOAK_JWK_URI}
-      - NOTIFICATION_KEYCLOAK_CLIENT_ID=${NOTIFICATION_KEYCLOAK_CLIENT_ID}
-      - NOTIFICATION_KEYCLOAK_CLIENT_SECRET=${NOTIFICATION_KEYCLOAK_CLIENT_SECRET}
-    depends_on:
-      accounts-service:
-        condition: service_started
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
-
-  front-service:
-    build:
-      context: .
-      dockerfile: front/Dockerfile
-    container_name: front-service
-    ports:
-      - "8000:8000"
-    networks:
-      - bank-network
-    environment:
-      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI}
-      - KEYCLOAK_AUTH_URI=${FRONT_KEYCLOAK_AUTH_URI}
-      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
-      - KEYCLOAK_USERINFO_URI=${KEYCLOAK_USERINFO_URI}
-      - KEYCLOAK_JWK_URI=${KEYCLOAK_JWK_URI}
-      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
-      - KEYCLOAK_CLIENT_ID=${FRONT_KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_CLIENT_SECRET=${FRONT_KEYCLOAK_CLIENT_SECRET}
-      - KEYCLOAK_REDIRECT_URI=${FRONT_KEYCLOAK_REDIRECT_URI}
-    restart: on-failure
-    depends_on:
-      gateway-service:
-        condition: service_started
-      keycloak:
-        condition: service_started
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
+       - bank-network
 
 networks:
   bank-network:
+  kafka-network:
 
 volumes:
   keycloak_data:

@@ -12,6 +12,7 @@ import com.example.accounts.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import shared.producer.NotificationProducer;
 
 
 import java.math.BigDecimal;
@@ -22,9 +23,11 @@ import java.util.Objects;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final NotificationProducer notificationProducer;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository , NotificationProducer notificationProducer) {
         this.accountRepository = accountRepository;
+        this.notificationProducer = notificationProducer;
     }
 
 
@@ -73,11 +76,12 @@ public class AccountService {
             accountRepository.save(account);
         }
 
+        notificationProducer.send("UPDATE_INFO", sub, "Обновленные данные: ФИО: %s День рождение: %s".formatted(accountUpdate.name(), accountUpdate.birthdate()) );
+
         return getUserById(sub);
     }
 
     public AccountResponse deposit(AccountOperationRequest accountChangeBalance) {
-
         AccountEntity account = accountRepository.findByUserId(accountChangeBalance.login()).orElse(null);
 
         if(account == null){

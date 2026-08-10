@@ -1,12 +1,14 @@
 spring:
   application:
     name: cash-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:http://localhost:9094}
   security:
     oauth2:
       client:
         registration:
-          keycloak:
-            provider: keycloak
+          keycloak:  # имя регистрации
+            provider: keycloak  # должно совпадать с именем в секции provider
             client-id: ${CASH_KEYCLOAK_CLIENT_ID:cash-service}
             client-secret: ${CASH_KEYCLOAK_CLIENT_SECRET:qSSVfNLbFKkmlvIN2rcuw23umfMd2y5d}
             authorization-grant-type: client_credentials
@@ -14,10 +16,9 @@ spring:
               - openid
               - profile
               - email
-
         provider:
-          keycloak-provider:
-            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/bank}
+          keycloak:  # имя должно совпадать с provider в registration
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}
@@ -32,13 +33,16 @@ spring:
         show-details: always
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8083}
+
+kafka:
+  topic:
+    notification:
+      name: "notification-topic"
 
 services:
   accounts:
-    url: ${ACCOUNTS_SERVICE_URL:http://localhost:3000}
-  notification:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:3003}
+    url: ${ACCOUNTS_SERVICE_URL:http://localhost:8082}
 
 # Для отладки
 logging:
