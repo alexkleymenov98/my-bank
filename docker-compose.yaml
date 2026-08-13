@@ -82,6 +82,41 @@ services:
       - "8081:8080"
     networks:
        - bank-network
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"  # Открываем порт для доступа к веб-интерфейсу
+    volumes:
+      - ./prometheus-data:/metrics/prometheus  # Папка для хранения данных
+      - ./metrics/prometheus:/etc/prometheus:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - bank-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Веб-интерфейс Grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_AUTH_ANONYMOUS_ENABLED=false  # Отключаем анонимный доступ
+    volumes:
+      - ./grafana-data:/var/lib/grafana  # Данные Grafana (дашборды, настройки)
+      - ./metrics/grafana:/etc/grafana/provisioning:ro  # Автоматическая настройка datasource
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - bank-network
 
 networks:
   bank-network:

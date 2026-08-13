@@ -25,14 +25,20 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bank}
           jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8080/realms/bank/protocol/openid-connect/certs}
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: health,info
-    endpoint:
-      health:
-        show-details: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 
 server:
   port: ${SERVER_PORT:8085}

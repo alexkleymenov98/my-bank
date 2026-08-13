@@ -33,5 +33,9 @@ out/
 /nbdist/
 /.nb-gradle/
 
+/grafana-data
+/prometheus-data
+/prometheus-config
+
 ### VS Code ###
 .vscode/
