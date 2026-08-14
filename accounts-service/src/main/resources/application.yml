@@ -43,6 +43,12 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_SERVICE_URL:http://localhost:9411/api/v2/spans} # Эндпоинт Zipkin для приёма спанов
+  tracing:
+    sampling:
+      probability: 1 # Сэмплируем все запросы
 
 server:
   port: ${SERVER_PORT:8082}
@@ -54,7 +60,6 @@ kafka:
 
 logging:
   level:
-    org.springframework.cloud.config.client: DEBUG
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    liquibase: DEBUG
+    com.example.accounts: ${LOGGING_LEVEL_APP:DEBUG}
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

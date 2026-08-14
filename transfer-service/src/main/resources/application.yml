@@ -37,6 +37,12 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_SERVICE_URL:http://localhost:9411/api/v2/spans} # Эндпоинт Zipkin для приёма спанов
+  tracing:
+    sampling:
+      probability: 1 # Сэмплируем все запросы
 
 server:
   port: ${SERVER_PORT:8084}
@@ -53,5 +59,7 @@ kafka:
 # Для отладки
 logging:
   level:
-    org.springframework.cloud.config.client: DEBUG
-    org.springframework.web: DEBUG
+    org.springframework.kafka: INFO
+    com.example.transfer: ${LOGGING_LEVEL_APP:DEBUG}
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
