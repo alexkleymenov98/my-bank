@@ -1,0 +1,35 @@
+# helm test pod — verifies Grafana answers on /api/health and that the
+# Prometheus datasource is reachable from inside Grafana.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-grafana-test"
+  labels:
+    app.kubernetes.io/name: grafana-test
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: bank
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: probe
+      image: curlimages/curl:8.5.0
+      command:
+        - sh
+        - -ec
+        - |
+          echo "==> Waiting for grafana:3000/api/health"
+          for i in $(seq 1 30); do
+            if curl -fsS "http://grafana:3000/api/health" > /dev/null; then
+              echo "==> grafana is healthy"
+              break
+            fi
+            [ "$i" = "30" ] && { echo "grafana never became healthy"; exit 1; }
+            sleep 2
+          done
+          echo "==> probing datasource reachability"
+          curl -fsS "{{ .Values.prometheus.url }}/-/ready" > /dev/null \
+            && echo "==> prometheus datasource reachable" \
+            || { echo "datasource unreachable"; exit 1; }

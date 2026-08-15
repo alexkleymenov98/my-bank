@@ -54,3 +54,38 @@ spec:
                 name: front-ui
                 port:
                   number: 8080
+          - path: /(zipkin/?.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: zipkin
+                port:
+                  number: 9411
+          - path: /(prometheus/?.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: prometheus
+                port:
+                   number: 9090
+          - path: /(alertmanager/?.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: alertmanager
+                port:
+                  number: 9093
+          - path: /(grafana/?.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+          - path: /(kibana/?.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601

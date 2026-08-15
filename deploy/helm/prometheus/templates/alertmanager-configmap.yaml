@@ -1,0 +1,35 @@
+# Alertmanager configuration with null receivers.
+#
+# All alerts route to the "null" receiver, which discards them. Alerts are
+# still visible in the Alertmanager UI for inspection (per Sprint 12 spec —
+# no external webhooks). In production you would add slack/pagerduty here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  labels:
+    {{- include "prometheus.alertmanager.labels" . | nindent 4 }}
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+
+    route:
+      receiver: "null"
+      group_by: ["alertname", "application"]
+      group_wait: 10s
+      group_interval: 30s
+      repeat_interval: 1h
+
+    receivers:
+      # Intentional no-op receiver. Alerts visible in UI only.
+      - name: "null"
+
+    inhibit_rules:
+      # If a service is down, suppress non-availability alerts for it —
+      # they''re consequences of the outage, not separate signals.
+      - source_matchers:
+          - alertname = "ServiceDown"
+        target_matchers:
+          - severity =~ "warning|critical"
+        equal: ["application", "pod"]

@@ -1,0 +1,18 @@
+# Dashboards ConfigMap: each JSON file under deploy/helm/grafana/dashboards/
+# becomes a key in this ConfigMap (key = filename, value = JSON content).
+# Grafana provisioning will pick them up from /var/lib/grafana/dashboards
+# via the provider above.
+#
+# Add new dashboards by dropping <name>.json into dashboards/ — no
+# template changes needed.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  labels:
+    {{- include "grafana.labels" . | nindent 4 }}
+data:
+{{- range $path, $_ := .Files.Glob "dashboards/*.json" }}
+  {{ base $path }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}

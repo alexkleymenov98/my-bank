@@ -1,7 +1,6 @@
 package ru.yandex.practicum.mybankfront.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import ru.yandex.practicum.mybankfront.dto.TransferRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -33,7 +31,7 @@ public class BankApiClient {
     public AccountDto getAccount() {
         log.info("Get getAccount");
         return restClient.get()
-                .uri("http://localhost:8082" + "/accounts/user")  // baseUrl уже установлен в бине
+                .uri(gatewayUrl + "/accounts/user")  // baseUrl уже установлен в бине
                 .retrieve()
                 .body(AccountDto.class);
     }
@@ -42,7 +40,7 @@ public class BankApiClient {
         log.info("Get getAccounts");
         // Если API возвращает массив
         AccountDto[] accounts = restClient.get()
-                .uri("http://localhost:8082"  + "/accounts/users")
+                .uri(gatewayUrl + "/accounts/users")
                 .retrieve()
                 .body(AccountDto[].class);
 
@@ -52,7 +50,7 @@ public class BankApiClient {
     public AccountDto updateAccount(AccountUpdate accountUpdate) {
         log.info("Update account: {}", accountUpdate);
         return restClient.post()
-                .uri("http://localhost:8082"  + "/accounts/user")
+                .uri(gatewayUrl  + "/accounts/user")
                 .body(accountUpdate)
                 .retrieve()
                 .body(AccountDto.class);
@@ -61,7 +59,7 @@ public class BankApiClient {
     public AccountDto updateCash(CashRequest cashRequest) {
         log.info("change cash: {}", cashRequest);
         return restClient.post()
-                .uri("http://localhost:8083"  + "/cash/balance")
+                .uri(gatewayUrl  + "/cash/balance")
                 .body(cashRequest)
                 .retrieve()
                 .body(AccountDto.class);
@@ -71,7 +69,7 @@ public class BankApiClient {
         log.info("change transfer: {}", transferRequest);
 
         return restClient.post()
-                .uri("http://localhost:8084"  + "/transfer")
+                .uri(gatewayUrl  + "/transfer")
                 .body(transferRequest)
                 .retrieve()
                 .body(AccountDto.class);

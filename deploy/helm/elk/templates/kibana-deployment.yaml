@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  labels:
+    {{- include "elk.kibana.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "elk.kibana.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "elk.kibana.labels" . | nindent 8 }}
+    spec:
+      # Kibana waits for ES on its own, but an explicit init keeps logs
+      # cleaner during first deploy.
+      initContainers:
+        - name: wait-for-es
+          image: curlimages/curl:8.5.0
+          command:
+            - sh
+            - -ec
+            - |
+              echo "Waiting for Elasticsearch..."
+              for i in $(seq 1 60); do
+                if curl -fsS "http://elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=5s" >/dev/null 2>&1; then
+                  echo "Elasticsearch is ready"
+                  exit 0
+                fi
+                echo "Attempt $i: ES not ready, retry in 3s"
+                sleep 3
+              done
+              echo "Elasticsearch did not become ready in time"
+              exit 1
+      containers:
+        - name: kibana
+          image: "{{ .Values.kibana.image.repository }}:{{ .Values.kibana.image.tag }}"
+          imagePullPolicy: {{ .Values.kibana.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5601
+              protocol: TCP
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: "http://elasticsearch:9200"
+            # Tell Kibana it lives under /kibana so its assets, login
+            # redirects and rewrites all use that prefix correctly when
+            # ingress strips/keeps it.
+            - name: SERVER_BASEPATH
+              value: {{ .Values.kibana.basePath | quote }}
+            - name: SERVER_REWRITEBASEPATH
+              value: "true"
+            - name: SERVER_PUBLICBASEURL
+              value: "http://bank.dev.local{{ .Values.kibana.basePath }}"
+            # Mandatory in Kibana 8.x — used to encrypt session cookies
+            # and saved objects. For a learning project we hard-code
+            # something stable; production should be a Secret.
+            - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+              value: "a-static-32-byte-key-for-bank-dev-do-not-use-in-prod"
+            - name: XPACK_REPORTING_ENCRYPTIONKEY
+              value: "a-static-32-byte-key-for-bank-dev-do-not-use-in-prod"
+            - name: XPACK_SECURITY_ENCRYPTIONKEY
+              value: "a-static-32-byte-key-for-bank-dev-do-not-use-in-prod"
+            # Disable telemetry — keeps the network clean and avoids
+            # phone-home noise in logs.
+            - name: TELEMETRY_ENABLED
+              value: "false"
+          readinessProbe:
+            httpGet:
+              # Kibana''s /api/status returns 200 only once it''s talked
+              # to ES and indices are ready. Path is relative to basePath.
+              path: {{ .Values.kibana.basePath }}/api/status
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.kibana.basePath }}/api/status
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  labels:
+    {{- include "elk.kibana.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.kibana.service.type }}
+  selector:
+    {{- include "elk.kibana.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.kibana.service.port }}
+      targetPort: http
+      protocol: TCP

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  labels:
+    {{- include "prometheus.alertmanager.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.alertmanager.service.type }}
+  selector:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.alertmanager.service.port }}
+      targetPort: http
+      protocol: TCP

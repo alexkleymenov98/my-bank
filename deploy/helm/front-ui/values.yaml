@@ -21,6 +21,7 @@ config:
 
 
   GATEWAY_SERVICE_URL: "http://bank.local"
+  ZIPKIN_SERVICE_URL: "http://zipkin:9411/api/v2/spans"
 
 secrets:
   KEYCLOAK_CLIENT_SECRET: "DG5Ve2hCLrGsOMUG0G5v9Yc7OgACOpCw"

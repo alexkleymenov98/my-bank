@@ -1,0 +1,53 @@
+# helm test pod — pings each ELK component on its health endpoint.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-elk-test"
+  labels:
+    app.kubernetes.io/name: elk-test
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: bank
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: probe
+      image: curlimages/curl:8.5.0
+      command:
+        - sh
+        - -ec
+        - |
+          echo "==> probing elasticsearch"
+          for i in $(seq 1 30); do
+            if curl -fsS "http://elasticsearch:9200/_cluster/health" > /dev/null; then
+              echo "elasticsearch ok"
+              break
+            fi
+            [ "$i" = "30" ] && { echo "ES not ready"; exit 1; }
+            sleep 2
+          done
+
+          echo "==> probing kibana"
+          for i in $(seq 1 60); do
+            if curl -fsS "http://kibana:5601{{ .Values.kibana.basePath }}/api/status" > /dev/null; then
+              echo "kibana ok"
+              break
+            fi
+            [ "$i" = "60" ] && { echo "Kibana not ready"; exit 1; }
+            sleep 2
+          done
+
+          echo "==> probing logstash TCP port"
+          # nc not in curlimages — use /dev/tcp via sh
+          for i in $(seq 1 30); do
+            if (echo > /dev/tcp/logstash/5044) 2>/dev/null; then
+              echo "logstash beats port reachable"
+              break
+            fi
+            [ "$i" = "30" ] && { echo "Logstash port not open"; exit 1; }
+            sleep 2
+          done
+
+          echo "==> All probes succeeded"

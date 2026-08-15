@@ -25,6 +25,8 @@ config:
 
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
 
+  ZIPKIN_SERVICE_URL: "http://zipkin:9411/api/v2/spans"
+
 secrets:
   DB_POSTGRES_PASSWORD: "accounts-pass"
 

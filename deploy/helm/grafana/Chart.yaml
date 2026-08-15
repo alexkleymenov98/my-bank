@@ -1,0 +1,12 @@
+apiVersion: v2
+name: grafana
+description: |
+  Grafana dashboards for bank-dev cluster. Reads metrics from the
+  in-cluster Prometheus (via subpath /prometheus on its Service).
+  Comes with three pre-provisioned dashboards:
+    - JVM Micrometer overview (community dashboard ID 4701)
+    - Spring Boot HTTP statistics (community dashboard ID 11378)
+    - Bank business metrics (custom, covers our bank_* counters)
+type: application
+version: 0.1.0
+appVersion: "11.3.0"
