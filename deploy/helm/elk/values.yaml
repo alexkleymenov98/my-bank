@@ -1,0 +1,43 @@
+# ELK stack values.
+#
+# Single-node, no auth, no TLS (it''s a dev cluster). Production would
+# enable xpack.security, run multi-node Elasticsearch, and put Kibana
+# behind an authentication proxy.
+
+elasticsearch:
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: 8.15.3
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 9200
+  # Single-node "discovery" + security off make ES start in ~30s with no
+  # bootstrap dance. Heap is set via ES_JAVA_OPTS below.
+  heapSize: 1g
+  persistence:
+    enabled: true
+    size: 4Gi
+    storageClass: ""
+
+logstash:
+  image:
+    repository: docker.elastic.co/logstash/logstash
+    tag: 8.15.3
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5044
+  heapSize: 512m
+
+kibana:
+  image:
+    repository: docker.elastic.co/kibana/kibana
+    tag: 8.15.3
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5601
+  # Path-prefix knobs so Kibana works correctly when ingress sends
+  # requests under /kibana.
+  basePath: /kibana

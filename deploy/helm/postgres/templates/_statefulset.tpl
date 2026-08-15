@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: "{{ .Values.postgres.image | default "postgres:16-alpine" }}"
+          image: "{{ .Values.postgres.image | default "postgres:latest" }}"
           imagePullPolicy: IfNotPresent
           ports:
             - name: postgres

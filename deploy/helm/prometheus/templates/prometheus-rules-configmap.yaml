@@ -1,0 +1,114 @@
+# Alerting rules for bank services.
+#
+# Sprint 12 requirements cover three buckets:
+#   1) Business — failed withdrawals, failed transfers, failed notifications
+#   2) JVM      — heap/CPU saturation, GC pressure
+#   3) HTTP     — error-rate spikes, service down
+#
+# Severity is informational: bank-dev has a null receiver so alerts are visible
+# only in the Alertmanager UI (per spec).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  labels:
+    {{- include "prometheus.prometheus.labels" . | nindent 4 }}
+data:
+  alerts.yml: |
+    groups:
+      - name: bank-business
+        interval: 30s
+        rules:
+          - alert: BankHighFailedWithdrawals
+            expr: sum(rate(bank_cash_withdraw_failed_total[5m])) > 0.1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: Elevated rate of failed cash withdrawals
+              description: |
+                More than 0.1 failed withdrawals per second over the last 5m.
+                Check cash-service logs and accounts-service availability.
+
+          - alert: BankHighFailedTransfers
+            expr: sum(rate(bank_transfer_failed_total[5m])) > 0.1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: Elevated rate of failed transfers
+              description: |
+                More than 0.1 failed transfers per second over the last 5m.
+
+          - alert: BankNotificationFailures
+            expr: sum(rate(bank_notification_failed_total[5m])) > 0.1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: Notification delivery failures
+              description: |
+                notifications-service is failing to process Kafka events.
+                Check broker connectivity and message format.
+
+      - name: bank-jvm
+        interval: 30s
+        rules:
+          - alert: JvmHighHeapUsage
+            expr: |
+              sum by (application, pod) (jvm_memory_used_bytes{area="heap"})
+                /
+              sum by (application, pod) (jvm_memory_max_bytes{area="heap"} > 0)
+                > 0.8
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: JVM heap usage above 80%
+              description: |
+                Pod {{`{{ $labels.pod }}`}} ({{`{{ $labels.application }}`}})
+                heap is above 80% for 10 minutes. Risk of GC thrashing or OOM.
+
+          - alert: JvmHighCpuUsage
+            expr: process_cpu_usage > 0.9
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: JVM CPU usage above 90%
+              description: |
+                Pod {{`{{ $labels.pod }}`}} ({{`{{ $labels.application }}`}})
+                has been using >90% CPU for 10 minutes.
+
+      - name: bank-availability
+        interval: 30s
+        rules:
+          - alert: ServiceDown
+            expr: up{job="bank-services"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: Bank service is down
+              description: |
+                Pod {{`{{ $labels.pod }}`}} ({{`{{ $labels.service }}`}})
+                stopped responding to scrapes for over a minute.
+
+          - alert: BankHighErrorRate
+            expr: |
+              sum by (application) (
+                rate(http_server_requests_seconds_count{status=~"5..",uri!~"/actuator.*"}[5m])
+              )
+                /
+              sum by (application) (
+                rate(http_server_requests_seconds_count{uri!~"/actuator.*"}[5m]) > 0
+              )
+                > 0.05
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: HTTP 5xx error rate above 5%
+              description: |
+                {{`{{ $labels.application }}`}} is returning more than 5% of
+                5xx responses on non-actuator endpoints (5m window).

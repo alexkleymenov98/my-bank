@@ -1,0 +1,24 @@
+# Pre-provisioned datasource: points Grafana at the in-cluster Prometheus.
+#
+# Note the URL includes /prometheus suffix because Prometheus runs with
+# --web.route-prefix=/prometheus. A common gotcha: setting just
+# http://prometheus:9090 here returns 404 on /api/v1/query.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  labels:
+    {{- include "grafana.labels" . | nindent 4 }}
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: {{ .Values.prometheus.url | quote }}
+        isDefault: true
+        editable: false
+        jsonData:
+          # Increase scrape interval hint so range queries don''t over-fetch.
+          timeInterval: 15s

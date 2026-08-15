@@ -16,7 +16,7 @@ COPY notification-service notification-service/
 COPY front front/
 
 RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew :shared:build -x test \
+    ./gradlew :shared:build -x test
 
 RUN --mount=type=cache,target=/root/.gradle \
     ./gradlew :notification-service:build -x test -x contractTest

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback configuration that adds a Logstash TCP appender alongside
+  the standard console appender. Each log event is sent as one JSON
+  object (one line) to logstash:5044. MDC fields traceId/spanId
+  (populated by Micrometer tracing in Sprint 12 Этап 1) are included
+  automatically by LogstashEncoder.
+
+  We hard-code the destination "logstash:5044" rather than reading it
+  from a property because Kubernetes auto-injects env vars per Service
+  (LOGSTASH_PORT=tcp://10.43.x.y:5044) and Spring''s relaxed binding
+  would pick those up via logstash.port — breaking the appender.
+
+  Outside k8s the appender silently retries — apps still run even if
+  the host is unreachable, just without log shipping.
+-->
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <springProperty scope="context" name="appName"
+                    source="spring.application.name" defaultValue="unknown"/>
+
+    <!-- TCP appender → Logstash. Destination is fixed — see comment above. -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>logstash:5044</destination>
+        <keepAliveDuration>30 seconds</keepAliveDuration>
+        <reconnectionDelay>5 seconds</reconnectionDelay>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdc>true</includeMdc>
+            <includeContext>false</includeContext>
+            <customFields>{"service":"${appName}"}</customFields>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+
+</configuration>

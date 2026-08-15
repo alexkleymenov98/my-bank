@@ -1,0 +1,31 @@
+image:
+  repository: grafana/grafana
+  tag: 11.3.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+admin:
+  user: admin
+  password: admin
+
+# Grafana ENV that we set explicitly. Path-prefix knobs make the UI work
+# correctly when ingress sends requests under /grafana.
+env:
+  GF_SERVER_ROOT_URL: http://bank.local/grafana/
+  GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+  GF_AUTH_ANONYMOUS_ENABLED: "false"
+  GF_USERS_ALLOW_SIGN_UP: "false"
+  # Disable phone-home / version checks for a cleaner offline experience.
+  GF_ANALYTICS_REPORTING_ENABLED: "false"
+  GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+
+prometheus:
+  url: http://prometheus:9090/prometheus
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""

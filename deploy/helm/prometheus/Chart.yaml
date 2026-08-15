@@ -1,0 +1,9 @@
+apiVersion: v2
+name: prometheus
+description: |
+  Prometheus monitoring stack for bank-dev cluster: Prometheus server
+  with Kubernetes service discovery, plus Alertmanager with null receivers
+  for in-cluster alerting (alerts visible only in UI, no external webhooks).
+type: application
+version: 0.1.0
+appVersion: "2.55.0"

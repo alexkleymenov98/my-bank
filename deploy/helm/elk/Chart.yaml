@@ -1,0 +1,10 @@
+apiVersion: v2
+name: elk
+description: |
+  Single-node ELK stack for bank-dev: Elasticsearch as a search/storage
+  backend, Logstash as a log aggregator with sensitive-data masking,
+  and Kibana as the UI. All three live in one chart for simplicity —
+  it''s a learning-grade deployment, not production.
+type: application
+version: 0.1.0
+appVersion: "8.15.3"

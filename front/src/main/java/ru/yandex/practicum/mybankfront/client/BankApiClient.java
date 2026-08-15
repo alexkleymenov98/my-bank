@@ -22,6 +22,7 @@ public class BankApiClient {
     @Value("${services.gateway.url}")
     private String gatewayUrl;
 
+
     public BankApiClient(@Qualifier("gatewayRestClient") RestClient restClient) {
         this.restClient = restClient;
         log.info("BankApiClient initialized with RestClient: {}", restClient.getClass());
@@ -30,7 +31,7 @@ public class BankApiClient {
     public AccountDto getAccount() {
         log.info("Get getAccount");
         return restClient.get()
-                .uri(gatewayUrl + "/api/accounts/user")  // baseUrl уже установлен в бине
+                .uri(gatewayUrl + "/accounts/user")  // baseUrl уже установлен в бине
                 .retrieve()
                 .body(AccountDto.class);
     }
@@ -39,7 +40,7 @@ public class BankApiClient {
         log.info("Get getAccounts");
         // Если API возвращает массив
         AccountDto[] accounts = restClient.get()
-                .uri(gatewayUrl + "/api/accounts/users")
+                .uri(gatewayUrl + "/accounts/users")
                 .retrieve()
                 .body(AccountDto[].class);
 
@@ -49,7 +50,7 @@ public class BankApiClient {
     public AccountDto updateAccount(AccountUpdate accountUpdate) {
         log.info("Update account: {}", accountUpdate);
         return restClient.post()
-                .uri(gatewayUrl + "/api/accounts/user")
+                .uri(gatewayUrl  + "/accounts/user")
                 .body(accountUpdate)
                 .retrieve()
                 .body(AccountDto.class);
@@ -57,9 +58,8 @@ public class BankApiClient {
 
     public AccountDto updateCash(CashRequest cashRequest) {
         log.info("change cash: {}", cashRequest);
-
         return restClient.post()
-                .uri(gatewayUrl + "/api/cash/balance")
+                .uri(gatewayUrl  + "/cash/balance")
                 .body(cashRequest)
                 .retrieve()
                 .body(AccountDto.class);
@@ -69,7 +69,7 @@ public class BankApiClient {
         log.info("change transfer: {}", transferRequest);
 
         return restClient.post()
-                .uri(gatewayUrl + "/api/transfer")
+                .uri(gatewayUrl  + "/transfer")
                 .body(transferRequest)
                 .retrieve()
                 .body(AccountDto.class);

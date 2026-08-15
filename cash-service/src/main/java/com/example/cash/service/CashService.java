@@ -2,6 +2,7 @@ package com.example.cash.service;
 
 import com.example.cash.client.AccountsClient;
 import com.example.cash.dto.*;
+import com.example.cash.metrics.CashMetrics;
 import com.example.cash.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,10 +14,12 @@ public class CashService {
 
     private final AccountsClient accountsClient;
     private final NotificationProducer notificationProducer;
+    private final CashMetrics cashMetrics;
 
-    public CashService(AccountsClient accountsClient, NotificationProducer notificationProducer) {
+    public CashService(AccountsClient accountsClient, NotificationProducer notificationProducer, CashMetrics cashMetrics) {
         this.accountsClient = accountsClient;
         this.notificationProducer = notificationProducer;
+        this.cashMetrics = cashMetrics;
     }
 
     public AccountDto operationCash(CashOperationRequest request){
@@ -31,7 +34,12 @@ public class CashService {
         if(request.action().equals(CashAction.PUT)){
             result =  accountsClient.deposit(accountRequest);
         } else {
-            result = accountsClient.withdraw(accountRequest);
+            try {
+                result = accountsClient.withdraw(accountRequest);
+            } catch (Exception e){
+                cashMetrics.recordWithdrawFailed(sub);
+                throw e;
+            }
         }
 
         String eventType = request.action() == CashAction.PUT ? "CASH_DEPOSIT" : "CASH_WITHDRAW";

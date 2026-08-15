@@ -1,0 +1,78 @@
+# Prometheus configuration — scrape config and alerting routes.
+#
+# Service discovery: kubernetes_sd_configs with pod annotations.
+# Pods that should be scraped need annotations:
+#   prometheus.io/scrape: "true"
+#   prometheus.io/port: "8080"
+#   prometheus.io/path: "/actuator/prometheus"
+# (These are already set on bank-services via bank/values-dev.yaml.)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  labels:
+    {{- include "prometheus.prometheus.labels" . | nindent 4 }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: bank-dev
+
+    rule_files:
+      - /etc/prometheus/rules/*.yml
+
+    alerting:
+      alertmanagers:
+        - path_prefix: /alertmanager
+          static_configs:
+            - targets:
+                - alertmanager:9093
+          # Alertmanager is under /alertmanager via ingress, but inside the
+          # cluster we hit its Service directly without path prefix.
+          # path_prefix is only needed if we route through ingress here.
+
+    scrape_configs:
+      # Prometheus scrapes itself for self-health metrics.
+      - job_name: prometheus
+        metrics_path: /prometheus/metrics
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # Bank microservices: discover by pod annotation prometheus.io/scrape=true.
+      # All annotations come from the pod metadata (set via Helm values).
+      - job_name: bank-services
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [bank-dev]
+        relabel_configs:
+          # Keep only pods marked for scraping.
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          # Use the prometheus.io/path annotation (default /metrics if missing).
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          # Use the prometheus.io/port annotation to replace the port in the
+          # discovered pod address.
+          - source_labels:
+              - __address__
+              - __meta_kubernetes_pod_annotation_prometheus_io_port
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          # Promote common K8s metadata to labels Grafana/PromQL can use.
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            action: replace
+            target_label: service

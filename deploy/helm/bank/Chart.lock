@@ -23,5 +23,20 @@ dependencies:
 - name: keycloak
   repository: https://charts.bitnami.com/bitnami
   version: 25.2.0
-digest: sha256:e8d60d83ec1cb0e6db55577bcacf8648fe2a56f516f63d4f08b4b36f217f547a
-generated: "2026-08-03T22:42:53.692413+03:00"
+- name: kafka
+  repository: https://charts.bitnami.com/bitnami
+  version: 31.5.0
+- name: zipkin
+  repository: file://../zipkin
+  version: 0.1.0
+- name: prometheus
+  repository: file://../prometheus
+  version: 0.1.0
+- name: grafana
+  repository: file://../grafana
+  version: 0.1.0
+- name: elk
+  repository: file://../elk
+  version: 0.1.0
+digest: sha256:1747c2e3bc936faef3780ca82f0747a2269c9fb49e878746eb6723875a494ff8
+generated: "2026-08-14T17:19:35.994069+03:00"

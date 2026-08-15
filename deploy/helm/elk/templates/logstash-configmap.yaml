@@ -1,0 +1,62 @@
+# Logstash pipeline:
+#   1) input  — TCP 5044, json_lines codec (logstash-logback-encoder
+#               in the apps sends one JSON object per line)
+#   2) filter — mask sensitive fields with gsub on the @message and
+#               drop a few noisy fields we never need in Kibana
+#   3) output — write to Elasticsearch, one index per day per service
+#
+# Masking rules:
+#   - replace password=<anything> → password=***
+#   - replace account ↑numbers (12+ digits) → ***
+#   - replace card-like 13-19 digit runs → ***
+# This is a "good enough" approach for an academic project. Production
+# would do this in the application before logging, or via a structured
+# masking library like LogStash::Filters::Mutate + a strict allow-list.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+  labels:
+    {{- include "elk.logstash.labels" . | nindent 4 }}
+data:
+  logstash.yml: |
+    http.host: 0.0.0.0
+    # Disable monitoring + xpack — we keep things minimal for dev.
+    xpack.monitoring.enabled: false
+  pipelines.yml: |
+    - pipeline.id: bank
+      path.config: "/usr/share/logstash/pipeline/bank.conf"
+  bank.conf: |
+    input {
+      tcp {
+        port => 5044
+        codec => json_lines
+      }
+    }
+
+    filter {
+      # Mask "password=<value>" — case-insensitive.
+      mutate {
+        gsub => [
+          "message", "(?i)(password\s*[=:]\s*)\S+", "\1***"
+        ]
+      }
+      # Mask any 12-19 digit run (covers card-style numbers and the
+      # synthetic 16-digit "account numbers" used in our app).
+      mutate {
+        gsub => [
+          "message", "\b\d{12,19}\b", "***"
+        ]
+      }
+      # Drop fields we never use in Kibana to keep storage small.
+      mutate {
+        remove_field => ["host", "port"]
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch:9200"]
+        index => "bank-logs-%{+YYYY.MM.dd}"
+      }
+    }

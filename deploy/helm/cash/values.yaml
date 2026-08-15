@@ -24,6 +24,8 @@ config:
 
   KAFKA_BOOTSTRAP_SERVERS: "bank-kafka:9092"
 
+  ZIPKIN_SERVICE_URL: "http://zipkin:9411/api/v2/spans"
+
 secrets:
   CASH_KEYCLOAK_CLIENT_SECRET: "qSSVfNLbFKkmlvIN2rcuw23umfMd2y5d"
 

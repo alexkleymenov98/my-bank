@@ -100,8 +100,8 @@ kafka:
     interbroker:
       protocol: PLAINTEXT
 
-  sasl:
-    enabledMechanisms: ""
+#  sasl:
+#    enabledMechanisms: ""
 
   provisioning:
     enabled: true

@@ -1,5 +1,6 @@
 package com.example.notification.consumer;
 
+import com.example.notification.metrics.NotificationMetrics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -12,6 +13,12 @@ import shared.dto.NotificationEvent;
 @Slf4j
 @Component
 public class NotificationConsumer {
+    private final NotificationMetrics notificationMetrics;
+
+    NotificationConsumer(NotificationMetrics notificationMetrics) {
+        this.notificationMetrics = notificationMetrics;
+    }
+
     @KafkaListener(
             topics = {
                     "notification-topic",
@@ -30,6 +37,7 @@ public class NotificationConsumer {
             log.info("[NOTIFICATION from KAFKA] login:" + event.login() + " type:" +event.eventType() + " message:" + event.message());
             ack.acknowledge();      // commit ТОЛЬКО после успешной обработки
         } catch (Exception ex) {
+            notificationMetrics.recordFailed(event != null ? event.login() : null);
             log.error("Failed to process event {} from {}, will retry", event.eventId(), topic, ex);
             throw ex;               // DefaultErrorHandler сделает retry/backoff
         }
